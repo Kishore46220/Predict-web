@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALL IN ONE Predictor</title>
+    <style>
+        /* Background Image */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+            background: url('background.jpg') no-repeat center center fixed; /* Background image */
+            background-size: cover; /* Full-page background */
+            overflow: hidden;
+        }
+
+        #particles-js {
+            position: fixed; /* Fixed position to stay on top */
+            width: 100%; /* Cover the entire page */
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1; /* Lower z-index to ensure it doesn't cover the main content */
+        }
+
+        #container {
+            position: relative; /* Relative positioning for layering content */
+            z-index: 2; /* Higher z-index to appear above particles */
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.8); /* Semi-transparent black background for text visibility */
+            border: 2px solid red;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        h1 {
+            color: red;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle animation -->
+    <div id="particles-js"></div>
+
+    <!-- Main content container -->
+    <div id="container">
+        <h1>ALL IN ONE Predictor</h1>
+        <p class="bold">Period Number: <span id="periodNumber" class="bold">Loading...</span></p>
+        <p class="bold">Time Remaining: <span id="timer" class="bold">00:30</span></p>
+        <div class="prediction">
+            <p class="bold">Prediction:</p>
+            <p><span class="bold">Colour:</span> <span id="colour" class="bold">Loading... 🌈</span></p>
+            <p><span class="bold">Size:</span> <span id="size" class="bold">Loading... 📏</span></p>
+            <p><span class="bold">Number:</span> <span id="number" class="bold">Loading... 🔢</span></p>
+        </div>
+        <h3 class="bold">Prediction History</h3>
+        <ul id="history" class="bold"></ul>
+    </div>
+
+    <!-- Include Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Particles.js configuration
+        particlesJS('particles-js', {
+            particles: {
+                number: {
+                    value: 80,
+                    density: {
+                        enable: true,
+                        value_area: 800
+                    }
+                },
+                color: {
+                    value: "#ff0000"
+                },
+                shape: {
+                    type: "circle",
+                    stroke: {
+                        width: 1,
+                        color: "#ffffff"
+                    },
+                },
+                opacity: {
+                    value: 0.5,
+                    random: true,
+                },
+                size: {
+                    value: 3,
+                    random: true,
+                },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: "#ff0000",
+                    opacity: 0.4,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: "none",
+                    random: false,
+                    straight: false,
+                    out_mode: "out",
+                    bounce: false,
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: {
+                        enable: true,
+                        mode: "grab"
+                    },
+                    onclick: {
+                        enable: true,
+                        mode: "push"
+                    },
+                    resize: true
+                },
+                modes: {
+                    grab: {
+                        distance: 140,
+                        line_linked: {
+                            opacity: 1
+                        }
+                    },
+                    push: {
+                        particles_nb: 4
+                    }
+                }
+            },
+            retina_detect: true
+        });
+
+        // Store the history of period number to track patterns
+        let periodHistory = [];
+
+        function generatePeriodNumber() {
+            const now = new Date();
+            const startHour = 5;
+            const startMinute = 30;
+
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHour, startMinute, 0);
+            let elapsedSeconds = Math.floor((now - startOfDay) / 1000);
+            if (elapsedSeconds < 0) elapsedSeconds = 0;
+
+            const totalPeriods = Math.floor(elapsedSeconds / 30);
+            const upcomingPeriod = totalPeriods + 1;
+
+            const formattedDate = now.toISOString().slice(0, 10).replace(/-/g, '');
+            return `${formattedDate}100005${String(upcomingPeriod).padStart(4, '0')}`;
+        }
+
+        function calculateRemainingTime() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            const remainingSeconds = 30 - (seconds % 30);
+            return remainingSeconds;
+        }
+
+        // Candlestick pattern detection function
+        function generatePrediction(periodNumber) {
+            // Add the current period number to the history
+            periodHistory.push(periodNumber);
+
+            // Only keep the last 5 periods for pattern recognition
+            if (periodHistory.length > 5) {
+                periodHistory.shift();
+            }
+
+            // Candlestick pattern detection (very simplified)
+            let pattern = "Neutral ⚖️";  // Default pattern
+
+            if (periodHistory.length === 5) {
+                const lastFive = periodHistory.slice(-5);
+
+                // Simple bullish or bearish pattern detection (for illustration)
+                const isBullish = lastFive[4] > lastFive[3] && lastFive[3] > lastFive[2] && lastFive[2] > lastFive[1] && lastFive[1] > lastFive[0];
+                const isBearish = lastFive[4] < lastFive[3] && lastFive[3] < lastFive[2] && lastFive[2] < lastFive[1] && lastFive[1] < lastFive[0];
+
+                if (isBullish) {
+                    pattern = "Bullish 🚀";  // Candlestick Bullish pattern
+                } else if (isBearish) {
+                    pattern = "Bearish 📉";  // Candlestick Bearish pattern
+                }
+            }
+
+            // Use the period number's last digit for other prediction components
+            const number = periodNumber % 10;
+            const colour = number % 2 === 0 ? "Red ❤️" : "Green 🍀";
+            const size = number < 5 ? "Small 📏" : "Big 📐";
+
+            // Set prediction text
+            document.getElementById('colour').textContent = colour;
+            document.getElementById('size').textContent = size;
+            document.getElementById('number').textContent = number + " 🔢";
+
+            // Update history
+            const history = document.getElementById('history');
+            const newPrediction = document.createElement('li');
+            newPrediction.textContent = `Period: ${periodNumber} | Colour: ${colour}, Size: ${size}, Number: ${number}`;
+            history.prepend(newPrediction);
+        }
+
+        function updateUI() {
+            const periodNumber = generatePeriodNumber();
+            const remainingSeconds = calculateRemainingTime();
+
+            document.getElementById('periodNumber').textContent = periodNumber;
+            document.getElementById('timer').textContent = `00:${remainingSeconds.toString().padStart(2, '0')}`;
+
+            // Update prediction only at the start of a new period
+            if (remainingSeconds === 30) {
+                generatePrediction(parseInt(periodNumber.slice(-4))); // Use last 4 digits of period number
+            }
+        }
+
+        setInterval(updateUI, 1000);
+        updateUI(); // Initialize UI on load
+    </script>
+</body>
+</html>
